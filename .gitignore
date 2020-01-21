@@ -56,3 +56,4 @@ dmypy.json
 
 # Client provided csv file
 Orders.csv
+out_products.csv

@@ -77,6 +77,29 @@ def get_delivery_time_mean_and_std(df: pd.DataFrame) -> Tuple:
     return df['Delivery Time'].mean(), df['Delivery Time'].std()
 
 
+def write_products_counts_and_profit(
+        df: pd.DataFrame,
+        outfile: str = 'out_products.csv'
+):
+    """
+    Function create dataframe with
+    id, Product ID, Sells Count, Profit Sum columns
+    and write it to <outfile> csv file
+    """
+    grouped_by_product = df[['Product ID', 'Profit']].groupby(['Product ID'])
+    # get ordered by product id dataframe Product Id - Sells Count
+    products_counted = grouped_by_product['Product ID'].count().reset_index(
+        name='Sells Count').sort_values(by=['Product ID'], ascending=True)
+
+    # get ordered by product id dataframe Product Id - Profit Sum
+    profit_sums = grouped_by_product['Profit'].sum().reset_index(
+        name='Profit Sum').sort_values(by=['Product ID'], ascending=True)
+
+    # add Profit Sum column to products_counted dataframe
+    products_counted['Profit Sum'] = profit_sums['Profit Sum']
+    products_counted.to_csv(outfile)
+
+
 def main():
     # TODO: parse path from args
     filepath = 'Orders.csv'
@@ -138,6 +161,10 @@ def main():
     # - найти стандартное отклонение от среднего срока доставки товара клиенту
     print('******* Стандартное отклонение от среднего срока доставки товара клиенту *******')
     print(f'{delivery_std}, (total_seconds={delivery_std.total_seconds()})\n')
+
+    # - посчитать и вывести в CSV-файл продажи,
+    #   количество продаж и профит по каждому продукту
+    write_products_counts_and_profit(df)
 
 
 if __name__ == '__main__':

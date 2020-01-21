@@ -1,4 +1,6 @@
+import argparse
 import pandas as pd
+
 from typing import Dict, Tuple
 
 
@@ -52,7 +54,8 @@ def get_best_and_worst_products(df: pd.DataFrame) -> Dict:
     grouped_by_product = df[['Product ID', 'Profit']].groupby(['Product ID'])
 
     # get dataframe with product repeats count
-    products_counted = grouped_by_product['Product ID'].count().reset_index(name='count')
+    products_counted = grouped_by_product['Product ID'].count().reset_index(
+        name='count')
 
     # filter dataframe by max and min repeats value
     products_by_count = extract_filtered_data(
@@ -80,7 +83,7 @@ def get_delivery_time_mean_and_std(df: pd.DataFrame) -> Tuple:
 def write_products_counts_and_profit(
         df: pd.DataFrame,
         outfile: str = 'out_products.csv'
-):
+) -> None:
     """
     Function create dataframe with
     id, Product ID, Sells Count, Profit Sum columns
@@ -98,12 +101,10 @@ def write_products_counts_and_profit(
     # add Profit Sum column to products_counted dataframe
     products_counted['Profit Sum'] = profit_sums['Profit Sum']
     products_counted.to_csv(outfile)
+    print('******* Файл out_products.csv сохранен в директории проекта *******')
 
 
-def main():
-    # TODO: parse path from args
-    filepath = 'Orders.csv'
-    df = get_dataframe(filepath)
+def get_and_print_results(df: pd.DataFrame) -> None:
 
     # - посчитать общий профит с точностью до цента
     pf_sum = get_profit_sum(df)
@@ -159,8 +160,26 @@ def main():
     print(f'{delivery_mean} ,(total_seconds={delivery_mean.total_seconds()})\n')
 
     # - найти стандартное отклонение от среднего срока доставки товара клиенту
-    print('******* Стандартное отклонение от среднего срока доставки товара клиенту *******')
+    print('******* Стандартное отклонение от среднего срока доставки товара '
+          'клиенту *******')
     print(f'{delivery_std}, (total_seconds={delivery_std.total_seconds()})\n')
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Print some statistics from csv file')
+    parser.add_argument(
+        '--csv_file',
+        type=str,
+        required=True,
+        help='path to csv file'
+    )
+    args = parser.parse_args()
+
+    filepath = args.csv_file
+    df = get_dataframe(filepath)
+    # print all results we need
+    get_and_print_results(df)
 
     # - посчитать и вывести в CSV-файл продажи,
     #   количество продаж и профит по каждому продукту

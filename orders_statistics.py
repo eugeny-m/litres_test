@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import Dict
+from typing import Dict, Tuple
 
 
 # get dataframe from csv file
@@ -72,9 +72,9 @@ def get_best_and_worst_products(df: pd.DataFrame) -> Dict:
     return result
 
 
-def get_delivery_time_mean(df: pd.DataFrame) -> pd.datetime:
+def get_delivery_time_mean_and_std(df: pd.DataFrame) -> Tuple:
     df['Delivery Time'] = df['Ship Date'] - df['Order Date']
-    return df['Delivery Time'].mean()
+    return df['Delivery Time'].mean(), df['Delivery Time'].std()
 
 
 def main():
@@ -131,9 +131,13 @@ def main():
     print()
 
     # - найти средний срок доставки товара клиенту
-    delivery_time_mean = get_delivery_time_mean(df)
+    delivery_mean, delivery_std = get_delivery_time_mean_and_std(df)
     print('******* Средний срок доставки товара клиенту *******')
-    print(delivery_time_mean)
+    print(f'{delivery_mean} ,(total_seconds={delivery_mean.total_seconds()})\n')
+
+    # - найти стандартное отклонение от среднего срока доставки товара клиенту
+    print('******* Стандартное отклонение от среднего срока доставки товара клиенту *******')
+    print(f'{delivery_std}, (total_seconds={delivery_std.total_seconds()})\n')
 
 
 if __name__ == '__main__':

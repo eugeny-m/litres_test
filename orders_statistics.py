@@ -25,19 +25,47 @@ def get_best_and_worst_products(df: pd.DataFrame) -> Dict:
     """
     result = dict() # type: Dict
 
-    # dataframe grouped by product id
-    grouped_by_product = df[['Product ID']].groupby(['Product ID'])['Product ID']
+    def extract_filtered_data(df, param):
+        # get min and max param values
+        min_val = df[param].min()
+        max_val = df[param].max()
 
-    # get max and min product repeats values
-    products_counted = grouped_by_product.count().reset_index(name='count')
-    sold_max = products_counted['count'].max()
-    sold_min = products_counted['count'].min()
+        # filter df by min and max value
+        min_df = df.loc[df[param] == min_val]
+        max_df = df.loc[df[param] == max_val]
+
+        res = {
+            'min': {
+                'min_val': min_val,
+                'objects': min_df['Product ID'].values.tolist()
+            },
+            'max': {
+                'max_val': max_val,
+                'objects': max_df['Product ID'].values.tolist()
+            },
+        }
+        return res
+
+    # dataframe grouped by product id
+    grouped_by_product = df[['Product ID', 'Profit']].groupby(['Product ID'])
+
+    # get dataframe with product repeats count
+    products_counted = grouped_by_product['Product ID'].count().reset_index(name='count')
 
     # filter dataframe by max and min repeats value
-    products_sold_max = products_counted.loc[products_counted['count'] == sold_max]
-    products_sold_min = products_counted.loc[products_counted['count'] == sold_min]
-    result['products_sold_max'] = products_sold_max['Product ID'].values.tolist()
-    result['products_sold_min'] = products_sold_min['Product ID'].values.tolist()
+    products_by_count = extract_filtered_data(
+        df=products_counted,
+        param='count'
+    )
+    result['products_by_count'] = products_by_count
+
+    # get dataframe with products and Profit sums
+    profit_sums = grouped_by_product['Profit'].sum().reset_index(name='sum')
+    products_by_profit = extract_filtered_data(
+        df=profit_sums,
+        param='sum'
+    )
+    result['products_by_profit'] = products_by_profit
 
     return result
 
@@ -49,18 +77,53 @@ def main():
 
     # - посчитать общий профит с точностью до цента
     pf_sum = get_profit_sum(df)
-    print(f'Profit sum = {pf_sum}')
+    print(f'******* Общий профит с точностью до цента *********')
+    print(f'Профит: {pf_sum} \n')
+
+    # get best and worst ratings
+    ratings = get_best_and_worst_products(df)
 
     # - найти самые лучшие продукты по продажам,
     #   по количеству продаж и по профиту соответственно
-    ratings = get_best_and_worst_products(df)
-    print('The best products by sold count')
-    for p in ratings['products_sold_max']:
+    print('******* Лучшие товары *********\n')
+    print('-По количеству продаж')
+    print('Максимальное количество продаж одного товара:',
+          ratings['products_by_count']['max']['max_val'])
+    print('Product IDs:')
+    for p in ratings['products_by_count']['max']['objects']:
+        print(f'   {p}')
+    print()
+    print('-По суммарному профиту')
+    print('Максимальный суммарный профит:',
+          ratings['products_by_profit']['max']['max_val']
+    )
+    print('Product IDs:')
+    for p in ratings['products_by_profit']['max']['objects']:
+        print(f'   {p}')
+    print()
+    
+    # - найти самые худшие продукты по продажам, 
+    #   по количеству продаж и по профиту соответственно
+    print('******* Худшие товары *********\n')
+    print('-По количеству продаж')
+    print('Минимальное количество продаж одного товара:',
+          ratings['products_by_count']['min']['min_val'])
+    print('Product IDs:')
+    print(', '.join(ratings['products_by_count']['min']['objects']))
+    # for p in ratings['products_by_count']['min']['objects']:
+    #     print(f'   {p}')
+    print()
+
+    print('-По суммарному профиту')
+    print('Минимальный профит:',
+          ratings['products_by_profit']['min']['min_val']
+    )
+    print('Product IDs:')
+    for p in ratings['products_by_profit']['min']['objects']:
         print(f'   {p}')
 
-    print('The worst products by sold count')
-    for p in ratings['products_sold_min']:
-        print(f'   {p}')
+    # - найти средний срок доставки товара клиенту
+
 
 
 if __name__ == '__main__':

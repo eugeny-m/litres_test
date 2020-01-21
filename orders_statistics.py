@@ -8,6 +8,8 @@ def get_dataframe(filepath: str) -> pd.DataFrame:
         filepath_or_buffer=filepath,
         sep=';',
         decimal=',',
+        parse_dates=['Ship Date', 'Order Date'],
+        date_parser=lambda x: pd.datetime.strptime(x, '%m/%d/%y')
     )
     return df
 
@@ -23,7 +25,7 @@ def get_best_and_worst_products(df: pd.DataFrame) -> Dict:
     this function extract best and worst products
     by sold count and by profit value
     """
-    result = dict() # type: Dict
+    result = dict()  # type: Dict
 
     def extract_filtered_data(df, param):
         # get min and max param values
@@ -70,6 +72,11 @@ def get_best_and_worst_products(df: pd.DataFrame) -> Dict:
     return result
 
 
+def get_delivery_time_mean(df: pd.DataFrame) -> pd.datetime:
+    df['Delivery Time'] = df['Ship Date'] - df['Order Date']
+    return df['Delivery Time'].mean()
+
+
 def main():
     # TODO: parse path from args
     filepath = 'Orders.csv'
@@ -85,7 +92,7 @@ def main():
 
     # - найти самые лучшие продукты по продажам,
     #   по количеству продаж и по профиту соответственно
-    print('******* Лучшие товары *********\n')
+    print('******* Лучшие товары *********')
     print('-По количеству продаж')
     print('Максимальное количество продаж одного товара:',
           ratings['products_by_count']['max']['max_val'])
@@ -101,10 +108,10 @@ def main():
     for p in ratings['products_by_profit']['max']['objects']:
         print(f'   {p}')
     print()
-    
-    # - найти самые худшие продукты по продажам, 
+
+    # - найти самые худшие продукты по продажам,
     #   по количеству продаж и по профиту соответственно
-    print('******* Худшие товары *********\n')
+    print('******* Худшие товары *********')
     print('-По количеству продаж')
     print('Минимальное количество продаж одного товара:',
           ratings['products_by_count']['min']['min_val'])
@@ -121,9 +128,12 @@ def main():
     print('Product IDs:')
     for p in ratings['products_by_profit']['min']['objects']:
         print(f'   {p}')
+    print()
 
     # - найти средний срок доставки товара клиенту
-
+    delivery_time_mean = get_delivery_time_mean(df)
+    print('******* Средний срок доставки товара клиенту *******')
+    print(delivery_time_mean)
 
 
 if __name__ == '__main__':

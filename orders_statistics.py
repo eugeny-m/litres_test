@@ -16,9 +16,9 @@ def get_dataframe(filepath: str) -> pd.DataFrame:
     return df
 
 
-# TODO: ask round result or cut 2 values after point
 def get_profit_sum(df: pd.DataFrame) -> str:
     profit_sum = df['Profit'].sum()
+    # use default python rounding
     return f'{profit_sum:.{2}f}'
 
 
@@ -141,8 +141,6 @@ def get_and_print_results(df: pd.DataFrame) -> None:
           ratings['products_by_count']['min']['min_val'])
     print('Product IDs:')
     print(', '.join(ratings['products_by_count']['min']['objects']))
-    # for p in ratings['products_by_count']['min']['objects']:
-    #     print(f'   {p}')
     print()
 
     print('-По суммарному профиту')

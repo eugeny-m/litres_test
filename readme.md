@@ -30,6 +30,9 @@ These instructions will get you a copy of the project up and running on your loc
 `python3.8 -m venv venv`
 * activate venv  
 `source venv/bin/activate`
+* install requirements  
+`pip install -U pip`  
+`pip install -r requirements.txt`
 
 ## Running
 

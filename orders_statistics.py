@@ -100,7 +100,7 @@ def write_products_counts_and_profit(
 
     # add Profit Sum column to products_counted dataframe
     products_counted['Profit Sum'] = profit_sums['Profit Sum']
-    products_counted.to_csv(outfile)
+    products_counted.to_csv(outfile, index_label='Row ID')
     print('******* Файл out_products.csv сохранен в директории проекта *******')
 
 
